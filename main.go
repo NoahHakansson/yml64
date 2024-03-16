@@ -21,8 +21,23 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/NoahHakansson/yml64/cmd"
+import (
+	"github.com/NoahHakansson/yml64/cmd"
+	"github.com/charmbracelet/log"
+	"github.com/spf13/viper"
+)
 
 func main() {
+	// load environment variables
+	viper.SetDefault("DEBUG", false)
+	viper.AutomaticEnv()
+	setLogLevel()
+	// Start the CLI
 	cmd.Execute()
+}
+
+func setLogLevel() {
+	if viper.GetBool("DEBUG") {
+		log.SetLevel(log.DebugLevel)
+	}
 }
