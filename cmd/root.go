@@ -38,7 +38,7 @@ var f model.Flags
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "yml64",
-	Short: "`yml64` is a CLI tool for encoding and decoding Kubernetes secret data properties in YAML/YML files using Base64.",
+	Short: "yml64 is a CLI tool for encoding and decoding Kubernetes secret data properties in YAML/YML files using Base64.",
 	Long:  `yml64 is a CLI tool for encoding/decoding Kubernetes secrets in YAML/YML files using Base64. It supports input from files or stdin and output to files or stdout. Written in Go, it offers fast performance and an easy-to-use command-line interface.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		// check if the number of arguments is exactly 1
