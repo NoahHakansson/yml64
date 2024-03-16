@@ -74,6 +74,7 @@ var rootCmd = &cobra.Command{
 		}
 
 		log.Debugf("Decode: %v", f.Decode)
+		log.Debugf("Metadata: %v", f.Metadata)
 		log.Debugf("Output: %v", f.Output)
 		log.Debugf("Inplace: %v", f.Inplace)
 		log.Debugf("Args: %s", args)
