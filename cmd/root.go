@@ -45,6 +45,12 @@ var rootCmd = &cobra.Command{
 		if err := cobra.MaximumNArgs(1)(cmd, args); err != nil {
 			return err
 		}
+
+		// if no input file is provided, the -i (inplace) flag is not allowed
+		if len(args) == 0 && f.Inplace {
+			return fmt.Errorf("inplace flag is not allowed when reading from stdin")
+		}
+
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -71,8 +77,7 @@ var rootCmd = &cobra.Command{
 		log.Debugf("Output: %v", f.Output)
 		log.Debugf("Inplace: %v", f.Inplace)
 		log.Debugf("Args: %s", args)
-		log.Debugf("File:\n%v", inputReader)
-		log.Debug("\n\n")
+		log.Debugf("File:\n%v\n\n", inputReader)
 
 		result, err := processData(inputReader, f.Decode)
 		if err != nil {
@@ -90,8 +95,7 @@ func processData(input io.Reader, decode bool) ([]byte, error) {
 	}
 
 	if decode {
-		// return process.DecodeDataProps(input)
-		fmt.Println("Decode: Not implemented yet")
+		return process.DecodeDataProps(data, f)
 	}
 	return process.EncodeDataProps(data, f)
 }
