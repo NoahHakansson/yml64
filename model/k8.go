@@ -1,7 +1,7 @@
 package model
 
 type KubeSecret struct {
-	ApiVersion string                 `yaml:"apiVersion" validate:"required"`
+	APIVersion string                 `yaml:"apiVersion" validate:"required"`
 	Data       map[string]string      `yaml:"data" validate:"required"`
 	Kind       string                 `yaml:"kind" validate:"required"`
 	Metadata   map[string]interface{} `yaml:"metadata" validate:"required"`
@@ -13,4 +13,21 @@ type Flags struct {
 	Metadata bool
 	Inplace  bool
 	Output   string
+}
+
+func FieldToKey(s string) string {
+	switch s {
+	case "APIVersion":
+		return "apiVersion"
+	case "Data":
+		return "data"
+	case "Kind":
+		return "kind"
+	case "Metadata":
+		return "metadata"
+	case "Type":
+		return "type"
+	default:
+		return "unknown field"
+	}
 }

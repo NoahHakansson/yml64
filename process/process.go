@@ -93,17 +93,10 @@ func validateInput(s model.KubeSecret) error {
 		log.Debugf("Validation errors: %v", verr)
 		missingKeys := []string{}
 		for _, e := range verr {
-			key := lowercaseFirst(e.Field())
+			key := model.FieldToKey(e.Field())
 			missingKeys = append(missingKeys, key)
 		}
 		return fmt.Errorf("input is not a valid kube secret: Missing keys: [%v]", strings.Join(missingKeys, ", "))
 	}
 	return nil
-}
-
-func lowercaseFirst(s string) string {
-	if len(s) < 1 {
-		return s
-	}
-	return strings.ToLower(s[0:1]) + s[1:]
 }
