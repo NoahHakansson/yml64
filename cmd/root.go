@@ -34,6 +34,7 @@ import (
 )
 
 var f model.Flags
+var input model.Input
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -51,6 +52,12 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("inplace flag is not allowed when reading from stdin")
 		}
 
+		// assign the input file path to a global variable
+		if len(args) > 0 && args[0] != "-" && args[0] != "" {
+			input.Exists = true
+			input.Path = args[0]
+		}
+
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -58,8 +65,8 @@ var rootCmd = &cobra.Command{
 		// get stdin
 		inputReader := cmd.InOrStdin()
 
-		// Read from stdin if no file is provided
-		if len(args) > 0 && args[0] != "-" {
+		// if an input file is provided, read from it
+		if input.Exists {
 			log.Debugf("Reading from file %s", args[0])
 			file, err := os.Open(args[0])
 			if err != nil {
@@ -69,7 +76,6 @@ var rootCmd = &cobra.Command{
 				return fmt.Errorf("could not read file %s: %v", args[0], err)
 			}
 			defer file.Close()
-			// assign the file to the inputReader
 			inputReader = file
 		}
 
@@ -78,14 +84,14 @@ var rootCmd = &cobra.Command{
 		log.Debugf("Output: %v", f.Output)
 		log.Debugf("Inplace: %v", f.Inplace)
 		log.Debugf("Args: %s", args)
+		log.Debugf("Nr of args: %d", len(args))
 		log.Debugf("File:\n%v\n\n", inputReader)
 
 		result, err := processData(inputReader, f.Decode)
 		if err != nil {
 			return err
 		}
-		return outputResult(result, args)
-
+		return outputResult(result)
 	},
 }
 
@@ -110,35 +116,37 @@ func Execute() {
 	}
 }
 
-func outputResult(result []byte, args []string) error {
-	// output result to a file, stdout or overwrite the input file
-	if f.Output != "" {
-		if f.Inplace && len(args) > 0 {
-			// overwrite the input file
-			log.Debugf("Overwriting file %s", args[0])
-			file, err := os.Create(args[0])
-			if err != nil {
-				return err
-			}
-			log.Debugf("Writing to file %s", args[0])
-			n, err := file.Write(result)
-			if err != nil {
-				return err
-			}
-			log.Debugf("Wrote %d bytes to file %s", n, args[0])
-			fmt.Println("File ", args[0], " has been encoded/decoded and saved.")
-		} else {
-			// write to a new file
-			err := os.WriteFile(f.Output, result, 0644)
-			if err != nil {
-				return err
-			}
-			fmt.Println("File ", f.Output, " has been created with the encoded/decoded content.")
-		}
-	} else {
-		// print to stdout
-		fmt.Print(string(result))
+func getDecodeOrEncodeMessage(decode bool) string {
+	if decode {
+		return "Decoded"
 	}
+	return "Encoded"
+}
+
+func writeResultToFile(result []byte, filePath string) error {
+	// write to a new file
+	err := os.WriteFile(filePath, result, 0644)
+	if err != nil {
+		return err
+	}
+	log.Debugf("Wrote %d bytes to file %s", len(result), filePath)
+	fmt.Println(getDecodeOrEncodeMessage(f.Decode), "content has been saved to file:", filePath)
+	return nil
+}
+
+func outputResult(result []byte) error {
+	// output result to a file, stdout or overwrite the input file
+	if f.Inplace && input.Exists {
+		// overwrite the input file
+		log.Debugf("Overwriting file %s", input.Path)
+		return writeResultToFile(result, input.Path)
+	} else if f.Output != "" {
+		// write to a new file
+		log.Debugf("Writing to file %s", f.Output)
+		return writeResultToFile(result, f.Output)
+	}
+	// print to stdout
+	fmt.Printf("%s", string(result))
 	return nil
 }
 

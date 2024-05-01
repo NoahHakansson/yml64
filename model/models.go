@@ -15,6 +15,11 @@ type Flags struct {
 	Output   string
 }
 
+type Input struct {
+	Exists bool
+	Path   string
+}
+
 func FieldToKey(s string) string {
 	switch s {
 	case "APIVersion":
